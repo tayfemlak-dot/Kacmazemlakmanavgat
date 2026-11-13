@@ -30,6 +30,13 @@
   .legal b { font-weight: 700; }
   .chk { display: flex; gap: 10px; align-items: flex-start; border: 1px solid #9AA3AE; border-top: none; padding: 10px 9px; font-size: 12.5px; line-height: 1.4; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .chk:first-of-type { border-top: 1px solid #9AA3AE; }
+  .tcbox { border: 2px solid #0F2338; padding: 10px 9px; margin-bottom: 10px; background: #FFFEF7; }
+  .tcbox label { display: block; font: 700 12px Arial, sans-serif; margin-bottom: 6px; }
+  .tcbox input { width: 100%; font: 700 22px/1 "Courier New", monospace; letter-spacing: 4px; padding: 10px; border: 2px solid #9AA3AE; border-radius: 6px; background: #fff; color: #0F2338; -webkit-appearance: none; }
+  .tcbox input.ok { border-color: #15803D; background: #F0FDF4; }
+  .tcbox input.bad { border-color: #E1251B; background: #FEF2F2; }
+  .tcmsg { font: 12px Arial; margin-top: 5px; color: #555; }
+  .tcmsg.ok { color: #15803D; font-weight: 700; } .tcmsg.bad { color: #E1251B; font-weight: 700; }
   .box { flex: 0 0 24px; height: 24px; border: 2px solid #0F2338; border-radius: 3px; display: flex; align-items: center; justify-content: center; font: 900 18px Arial; color: #15803D; background: #fff; }
   .chk.on .box { background: #ECFDF5; border-color: #15803D; }
   .chk.on .box::after { content: "✓"; }
@@ -111,7 +118,7 @@
   var satirlar = [
     ["Ad Soyad", musteri],
     ["Telefon", D.mt || "—"],
-    ["T.C. Kimlik No", D.mc || "—"],
+    ["T.C. Kimlik No", D.mc || "(aşağıdaki alana yazınız)"],
     ["Gösterim Tarihi / Saati", tarihTR(D.t) + " " + (D.s || "")],
     ["Geçerlilik (6 Ay)", tarihTR(D.g)]
   ];
@@ -145,6 +152,9 @@
       tablo("1. MÜŞTERİ VE GÖSTERİM BİLGİLERİ", satirlar) +
       tablo("2. GÖSTERİLEN TAŞINMAZ", tasinmaz) +
       '<div class="legal"><b>3. BEYAN VE TAAHHÜT:</b> ' + yasal + "</div>" +
+      '<div class="tcbox"><label for="tc">T.C. KİMLİK NUMARANIZ (11 hane) *</label>' +
+        '<input id="tc" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="11" autocomplete="off" placeholder="___________" value="' + esc(String(D.mc || "").replace(/\D/g, "").slice(0, 11)) + '" />' +
+        '<div class="tcmsg" id="tcmsg">Lütfen 11 haneli T.C. kimlik numaranızı yazın.</div></div>' +
       '<div id="chks">' + MADDELER.map(function (t, i) { return '<div class="chk" data-i="' + i + '"><span class="box"></span><span>' + esc(t) + "</span></div>"; }).join("") + "</div>" +
       '<div class="sigrow">' +
         '<div class="sigcol"><h4>MÜŞTERİ İMZASI <button type="button" id="clr">Temizle</button></h4>' +
@@ -157,6 +167,30 @@
       '<div class="meta">' + esc(OFIS.adres) + " · Tel: " + esc(OFIS.tel) + "</div>" +
     "</div>";
   document.getElementById("actions").style.display = "flex";
+
+  // T.C. Kimlik No — sadece rakam, 11 hane, resmî algoritma kontrolü
+  function tcGecerli(v) {
+    if (!/^[1-9][0-9]{10}$/.test(v)) return false;
+    var d = v.split("").map(Number);
+    var tek = d[0] + d[2] + d[4] + d[6] + d[8], cift = d[1] + d[3] + d[5] + d[7];
+    var h10 = ((tek * 7 - cift) % 10 + 10) % 10;
+    if (h10 !== d[9]) return false;
+    var top = 0; for (var i = 0; i < 10; i++) top += d[i];
+    return top % 10 === d[10];
+  }
+  var tcInp = document.getElementById("tc"), tcMsg = document.getElementById("tcmsg");
+  function tcKontrol(zorla) {
+    var v = tcInp.value.replace(/\D/g, "").slice(0, 11);
+    if (tcInp.value !== v) tcInp.value = v;
+    tcInp.classList.remove("ok", "bad"); tcMsg.className = "tcmsg";
+    if (tcGecerli(v)) { tcInp.classList.add("ok"); tcMsg.classList.add("ok"); tcMsg.textContent = "✓ T.C. kimlik numarası geçerli."; return; }
+    if (v.length === 11 || (zorla && v.length)) { tcInp.classList.add("bad"); tcMsg.classList.add("bad"); tcMsg.textContent = v.length === 11 ? "✗ Bu T.C. kimlik numarası geçersiz. Lütfen kontrol edin." : "✗ " + v.length + " hane girdiniz, 11 hane olmalı."; return; }
+    if (zorla) { tcInp.classList.add("bad"); tcMsg.classList.add("bad"); tcMsg.textContent = "✗ T.C. kimlik numarası zorunludur."; return; }
+    tcMsg.textContent = v.length ? (11 - v.length) + " hane kaldı." : "Lütfen 11 haneli T.C. kimlik numaranızı yazın.";
+  }
+  tcInp.addEventListener("input", function () { tcKontrol(false); });
+  tcInp.addEventListener("blur", function () { if (tcInp.value) tcKontrol(true); });
+  if (tcInp.value) tcKontrol(false);
 
   // Onay kutuları
   var secili = [false, false, false];
@@ -301,6 +335,11 @@
   var pdf = null, zaman = "";
   var btnSign = document.getElementById("btnSign"), btnSend = document.getElementById("btnSend"), btnDl = document.getElementById("btnDl");
   btnSign.addEventListener("click", function () {
+    if (!tcGecerli(tcInp.value)) {
+      tcKontrol(true); alert("Lütfen geçerli 11 haneli T.C. kimlik numaranızı yazın.");
+      tcInp.scrollIntoView({ behavior: "smooth", block: "center" }); tcInp.focus(); return;
+    }
+    satirlar[2][1] = tcInp.value;
     var eksik = false;
     Array.prototype.forEach.call(document.querySelectorAll(".chk"), function (el, i) { if (!secili[i]) { el.classList.add("err"); eksik = true; } });
     if (eksik) { alert("Lütfen 3 onay kutusunun tamamını işaretleyin."); return; }
@@ -308,7 +347,7 @@
     btnSign.disabled = true; btnSign.textContent = "⏳ İmzalı PDF hazırlanıyor...";
     setTimeout(function () {
       try {
-        imzali = true; zaman = simdi();
+        imzali = true; zaman = simdi(); tcInp.readOnly = true;
         pdf = pdfYap(sayfaCiz(zaman));
         var dn = document.getElementById("done");
         dn.style.display = "block";
@@ -325,7 +364,7 @@
     var a = document.createElement("a"); a.href = URL.createObjectURL(pdf); a.download = dosyaAdi;
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
   }
-  var mesaj = function () { return "✅ " + D.b + " numaralı yer gösterme tutanağını onayladım ve imzaladım.\nAd Soyad: " + musteri + "\nTaşınmaz: " + (D.p || "") + " · " + (D.pb || "") + "\nİmza zamanı: " + zaman + "\nDoğrulama: " + (D.k || ""); };
+  var mesaj = function () { return "✅ " + D.b + " numaralı yer gösterme tutanağını onayladım ve imzaladım.\nAd Soyad: " + musteri + "\nT.C. Kimlik No: " + tcInp.value + "\nTaşınmaz: " + (D.p || "") + " · " + (D.pb || "") + "\nİmza zamanı: " + zaman + "\nDoğrulama: " + (D.k || ""); };
   btnSend.addEventListener("click", function () {
     if (!pdf) return;
     if (navigator.canShare && navigator.canShare({ files: [pdf] })) {
