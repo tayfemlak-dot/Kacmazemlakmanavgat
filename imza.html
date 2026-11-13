@@ -118,7 +118,7 @@
   var satirlar = [
     ["Ad Soyad", musteri],
     ["Telefon", D.mt || "—"],
-    ["T.C. Kimlik No", D.mc || "(aşağıdaki alana yazınız)"],
+    ["T.C. Kimlik No", D.mc || "(hemen alttaki kutuya yazınız)"],
     ["Gösterim Tarihi / Saati", tarihTR(D.t) + " " + (D.s || "")],
     ["Geçerlilik (6 Ay)", tarihTR(D.g)]
   ];
@@ -150,11 +150,11 @@
       "<h1>TAŞINMAZ YER GÖSTERME TUTANAĞI</h1>" +
       '<div class="sub">' + esc(OFIS.unvan) + " · " + esc(OFIS.vd) + " · Yetki No: " + esc(OFIS.yetki) + "</div>" +
       tablo("1. MÜŞTERİ VE GÖSTERİM BİLGİLERİ", satirlar) +
+      '<div class="tcbox"><label for="tc">T.C. KİMLİK NUMARANIZ (11 hane) *</label>' +
+        '<input id="tc" type="text" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" maxlength="11" autocomplete="off" placeholder="___________" value="' + esc(String(D.mc || "").replace(/\D/g, "").slice(0, 11)) + '" />' +
+        '<div class="tcmsg" id="tcmsg">Lütfen 11 haneli T.C. kimlik numaranızı yazın.</div></div>' +
       tablo("2. GÖSTERİLEN TAŞINMAZ", tasinmaz) +
       '<div class="legal"><b>3. BEYAN VE TAAHHÜT:</b> ' + yasal + "</div>" +
-      '<div class="tcbox"><label for="tc">T.C. KİMLİK NUMARANIZ (11 hane) *</label>' +
-        '<input id="tc" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="11" autocomplete="off" placeholder="___________" value="' + esc(String(D.mc || "").replace(/\D/g, "").slice(0, 11)) + '" />' +
-        '<div class="tcmsg" id="tcmsg">Lütfen 11 haneli T.C. kimlik numaranızı yazın.</div></div>' +
       '<div id="chks">' + MADDELER.map(function (t, i) { return '<div class="chk" data-i="' + i + '"><span class="box"></span><span>' + esc(t) + "</span></div>"; }).join("") + "</div>" +
       '<div class="sigrow">' +
         '<div class="sigcol"><h4>MÜŞTERİ İMZASI <button type="button" id="clr">Temizle</button></h4>' +
@@ -164,7 +164,7 @@
           '<div class="stamp"><b>' + esc(OFIS.unvan) + "</b>" + esc(OFIS.ad) + "<br>" + esc(OFIS.vd) + "<br>Tek Yetkili: " + esc(OFIS.yetkili) + "</div></div>" +
       "</div>" +
       '<div class="done" id="done"></div>' +
-      '<div class="meta">' + esc(OFIS.adres) + " · Tel: " + esc(OFIS.tel) + "</div>" +
+      '<div class="meta">' + esc(OFIS.adres) + " · Tel: " + esc(OFIS.tel) + " · Form v3</div>" +
     "</div>";
   document.getElementById("actions").style.display = "flex";
 
@@ -181,14 +181,20 @@
   var tcInp = document.getElementById("tc"), tcMsg = document.getElementById("tcmsg");
   function tcKontrol(zorla) {
     var v = tcInp.value.replace(/\D/g, "").slice(0, 11);
-    if (tcInp.value !== v) tcInp.value = v;
+    if (/\D/.test(tcInp.value) || tcInp.value.length > 11) tcInp.value = v;
     tcInp.classList.remove("ok", "bad"); tcMsg.className = "tcmsg";
     if (tcGecerli(v)) { tcInp.classList.add("ok"); tcMsg.classList.add("ok"); tcMsg.textContent = "✓ T.C. kimlik numarası geçerli."; return; }
     if (v.length === 11 || (zorla && v.length)) { tcInp.classList.add("bad"); tcMsg.classList.add("bad"); tcMsg.textContent = v.length === 11 ? "✗ Bu T.C. kimlik numarası geçersiz. Lütfen kontrol edin." : "✗ " + v.length + " hane girdiniz, 11 hane olmalı."; return; }
     if (zorla) { tcInp.classList.add("bad"); tcMsg.classList.add("bad"); tcMsg.textContent = "✗ T.C. kimlik numarası zorunludur."; return; }
     tcMsg.textContent = v.length ? (11 - v.length) + " hane kaldı." : "Lütfen 11 haneli T.C. kimlik numaranızı yazın.";
   }
-  tcInp.addEventListener("input", function () { tcKontrol(false); });
+  var act = document.getElementById("actions");
+  tcInp.addEventListener("focus", function () { act.style.display = "none"; setTimeout(function () { tcInp.scrollIntoView({ block: "center" }); }, 300); });
+  tcInp.addEventListener("blur", function () { act.style.display = "flex"; });
+  function barGoster(e) { if (e.target !== tcInp && act.style.display === "none") { act.style.display = "flex"; if (document.activeElement === tcInp) tcInp.blur(); } }
+  document.addEventListener("touchstart", barGoster, true);
+  document.addEventListener("mousedown", barGoster, true);
+  tcInp.addEventListener("input", function () { tcKontrol(false); if (tcGecerli(tcInp.value)) { tcInp.blur(); act.style.display = "flex"; } });
   tcInp.addEventListener("blur", function () { if (tcInp.value) tcKontrol(true); });
   if (tcInp.value) tcKontrol(false);
 
