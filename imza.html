@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Taşınmaz Yer Gösterme Tutanağı — Kaçmaz Emlak Manavgat</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #525659; }
+  body { font-family: "Times New Roman", Georgia, serif; color: #111; padding: 10px 8px 120px; -webkit-text-size-adjust: 100%; }
+  .bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 8px; background: #323639; color: #fff; font: 600 12px/1.2 -apple-system, Segoe UI, Arial, sans-serif; padding: 9px 12px; margin: -10px -8px 12px; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+  .bar .ic { background: #E1251B; color: #fff; border-radius: 3px; padding: 2px 5px; font-size: 10px; }
+  .bar .nm { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .page { background: #fff; max-width: 794px; margin: 0 auto; padding: 28px 24px 26px; box-shadow: 0 4px 18px rgba(0,0,0,.45); position: relative; }
+  .hd { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px double #0F2338; padding-bottom: 10px; margin-bottom: 12px; gap: 10px; }
+  .brand { font: 800 17px/1.1 Arial, sans-serif; color: #E1251B; letter-spacing: .3px; }
+  .brand small { display: block; color: #0F2338; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; margin-top: 3px; }
+  .slogan { font: 700 9.5px Arial, sans-serif; margin-top: 4px; }
+  .slogan .r { color: #E1251B } .slogan .b { color: #1D4ED8 } .slogan .g { color: #15803D }
+  .docno { text-align: right; font: 700 10px/1.5 Arial, sans-serif; color: #333; }
+  .docno b { display: inline-block; background: #0F2338; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 11px; }
+  h1 { text-align: center; font-size: 17px; letter-spacing: .5px; margin: 6px 0 2px; }
+  .sub { text-align: center; font-size: 10.5px; color: #444; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 10px; }
+  th { background: #EEF1F5; text-align: left; font: 700 10.5px Arial, sans-serif; letter-spacing: .5px; padding: 5px 7px; border: 1px solid #9AA3AE; }
+  td { border: 1px solid #9AA3AE; padding: 5px 7px; vertical-align: top; }
+  td.k { width: 34%; font-weight: 700; background: #FAFBFC; }
+  .legal { border: 1px solid #9AA3AE; padding: 8px 9px; font-size: 11.5px; line-height: 1.5; text-align: justify; margin-bottom: 10px; }
+  .legal b { font-weight: 700; }
+  .chk { display: flex; gap: 10px; align-items: flex-start; border: 1px solid #9AA3AE; border-top: none; padding: 10px 9px; font-size: 12.5px; line-height: 1.4; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .chk:first-of-type { border-top: 1px solid #9AA3AE; }
+  .box { flex: 0 0 24px; height: 24px; border: 2px solid #0F2338; border-radius: 3px; display: flex; align-items: center; justify-content: center; font: 900 18px Arial; color: #15803D; background: #fff; }
+  .chk.on .box { background: #ECFDF5; border-color: #15803D; }
+  .chk.on .box::after { content: "✓"; }
+  .chk.err .box { border-color: #E1251B; box-shadow: 0 0 0 3px rgba(225,37,27,.25); }
+  .sigrow { display: flex; gap: 10px; margin-top: 12px; }
+  .sigcol { flex: 1; border: 1px solid #9AA3AE; padding: 6px 7px; min-width: 0; }
+  .sigcol h4 { font: 700 10px Arial, sans-serif; letter-spacing: .6px; color: #333; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+  .sigcol h4 button { font: 700 10px Arial; border: 1px solid #999; background: #fff; border-radius: 4px; padding: 3px 7px; }
+  canvas#sig { width: 100%; height: 150px; border: 1.5px dashed #E1251B; border-radius: 4px; touch-action: none; background: #FFFEF7; display: block; }
+  canvas#sig.ok { border-color: #15803D; border-style: solid; }
+  .hint { font: 11px Arial; color: #B45309; margin-top: 4px; }
+  .stamp { border: 2px solid #1D4ED8; color: #1D4ED8; border-radius: 6px; padding: 8px; text-align: center; font: 700 10px/1.4 Arial, sans-serif; transform: rotate(-3deg); margin-top: 6px; }
+  .stamp b { font-size: 11px; display: block; }
+  .meta { font: 10px/1.5 Arial; color: #555; margin-top: 10px; border-top: 1px solid #ccc; padding-top: 6px; }
+  .actions { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(50,54,57,.97); padding: 10px 10px calc(10px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 8px; z-index: 9; }
+  .btn { width: 100%; border: none; border-radius: 10px; padding: 14px 12px; font: 800 15px Arial, sans-serif; color: #fff; cursor: pointer; }
+  .btn.main { background: #15803D; } .btn.wa { background: #16A34A; } .btn.sec { background: #fff; color: #0F2338; font-size: 13px; padding: 11px; }
+  .btn:disabled { opacity: .55; }
+  .done { display: none; background: #ECFDF5; border: 2px solid #15803D; color: #14532D; font: 700 12px/1.45 Arial; padding: 9px; border-radius: 6px; margin-top: 10px; text-align: center; }
+  .err-page { color: #fff; font: 15px Arial; text-align: center; padding: 60px 20px; }
+  @media (max-width: 480px) { .page { padding: 18px 12px; } h1 { font-size: 15px; } .sigrow { flex-direction: column; } }
+</style>
+</head>
+<body>
+<div class="bar"><span class="ic">PDF</span><span class="nm" id="fname">Yer_Gosterme_Tutanagi.pdf</span><span>1 / 1</span></div>
+<div id="root"></div>
+<div class="actions" id="actions" style="display:none">
+  <button class="btn main" id="btnSign">✅ Kutuları Onayla ve İmzala</button>
+  <button class="btn wa" id="btnSend" style="display:none">📤 İmzalı PDF'i Ofise Gönder (WhatsApp)</button>
+  <button class="btn sec" id="btnDl" style="display:none">⬇️ İmzalı PDF'i İndir</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var OFIS = {
+    unvan: "TAYF YAŞAM GAYRİMENKUL TİC. LTD. ŞTİ.",
+    ad: "KAÇMAZ EMLAK MANAVGAT TEMSİLCİLİĞİ",
+    vd: "Manavgat VD · 8320880131",
+    yetki: "0702087",
+    yetkili: "Yakub Alp YILMAZ",
+    adres: "Mimar Sinan Mah. Oymapınar Cad. Melekşirin Apt. No:38 Manavgat / ANTALYA",
+    tel: "0536 493 77 50",
+    waGeri: "905364937750"
+  };
+  var MADDELER = [
+    "Taşınmazın tarafıma gösterildiğini ve hizmet bedeli şartını okudum, onaylıyorum.",
+    "Uyuşmazlıklarda Manavgat Adliyesi'nin yetkisini kabul ediyorum.",
+    "6698 sayılı KVKK aydınlatma metnini okudum ve açık rızamla onaylıyorum."
+  ];
+
+  function b64dec(t) {
+    try {
+      var s = String(t || "").trim().replace(/-/g, "+").replace(/_/g, "/");
+      while (s.length % 4) s += "=";
+      return JSON.parse(decodeURIComponent(escape(atob(s))));
+    } catch (e) { return null; }
+  }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function para(n) { var x = Number(n); return isFinite(x) && x > 0 ? x.toLocaleString("tr-TR") + " ₺" : String(n || "—"); }
+  function tarihTR(d) { var p = String(d || "").split("-"); return p.length === 3 ? p[2] + "." + p[1] + "." + p[0] : String(d || "—"); }
+  function simdi() { var d = new Date(); function z(n) { return String(n).padStart(2, "0"); } return z(d.getDate()) + "." + z(d.getMonth() + 1) + "." + d.getFullYear() + " " + z(d.getHours()) + ":" + z(d.getMinutes()); }
+  function titleCase(s) { return String(s || "").toLocaleLowerCase("tr-TR").replace(/(^|\s)(\S)/g, function (m, a, b) { return a + b.toLocaleUpperCase("tr-TR"); }); }
+
+  var m = location.hash.match(/belge=([^&]+)/);
+  var D = m ? b64dec(m[1]) : null;
+  var root = document.getElementById("root");
+  if (!D || !D.b) {
+    root.innerHTML = '<div class="err-page">⚠️ Belge bağlantısı eksik veya bozuk.<br>Lütfen Kaçmaz Emlak Manavgat ile iletişime geçin: ' + OFIS.tel + '</div>';
+    return;
+  }
+  var musteri = titleCase(D.ma);
+  var kiralik = /kira/i.test(D.is || "");
+  var bedelMetni = kiralik ? "1 (bir) aylık kira bedeli + KDV" : "satış bedelinin %4'ü + KDV";
+  var dosyaAdi = "Yer_Gosterme_" + D.b + "_imzali.pdf";
+  document.getElementById("fname").textContent = "Yer_Gosterme_Tutanagi_" + D.b + ".pdf";
+  document.title = D.b + " — Yer Gösterme Tutanağı";
+
+  var satirlar = [
+    ["Ad Soyad", musteri],
+    ["Telefon", D.mt || "—"],
+    ["T.C. Kimlik No", D.mc || "—"],
+    ["Gösterim Tarihi / Saati", tarihTR(D.t) + " " + (D.s || "")],
+    ["Geçerlilik (6 Ay)", tarihTR(D.g)]
+  ];
+  var tasinmaz = [
+    ["Portföy No", D.p || "—"],
+    ["Taşınmaz", D.pb || "—"],
+    ["Konum", "Manavgat / " + (D.mh || "—")],
+    ["Ada / Parsel", D.ap || "—"],
+    ["Nitelik", (D.kt || "Konut") + " · " + (D.od || "—") + " · " + (D.m2 || "—") + " m² · Kat: " + (D.ka || "—")],
+    ["Tapu Durumu", D.tp || "—"],
+    ["İşlem / Bedel", (D.is || "—") + " · " + para(D.fy)]
+  ];
+  var yasal = "Yukarıda bilgileri yazılı taşınmaz, <b>" + OFIS.unvan + "</b> (" + OFIS.ad + ", Yetki Belge No: " + OFIS.yetki + ") aracılığıyla tarafıma gösterilmiştir. " +
+    "Bu taşınmazı gösterim tarihinden itibaren 6 (altı) ay içinde doğrudan ya da dolaylı olarak satın almam veya kiralamam halinde, " +
+    "<b>" + bedelMetni + "</b> tutarındaki hizmet bedelini ödemeyi kabul ederim. Uyuşmazlıklarda <b>Manavgat Mahkemeleri ve İcra Daireleri</b> yetkilidir. " +
+    "Kişisel verilerim 6698 sayılı KVKK kapsamında yalnızca bu tutanak amacıyla işlenir.";
+
+  function tablo(baslik, rows) {
+    var h = '<table><tr><th colspan="2">' + baslik + "</th></tr>";
+    rows.forEach(function (r) { h += '<tr><td class="k">' + esc(r[0]) + "</td><td>" + esc(r[1]) + "</td></tr>"; });
+    return h + "</table>";
+  }
+
+  root.innerHTML =
+    '<div class="page" id="page">' +
+      '<div class="hd"><div><div class="brand">KAÇMAZ EMLAK<small>MANAVGAT</small></div>' +
+      '<div class="slogan"><span class="r">Doğru Analiz,</span> <span class="b">Etkili Pazarlama,</span> <span class="g">Hızlı Sonuç</span></div></div>' +
+      '<div class="docno"><b>' + esc(D.b) + "</b><br>Doğrulama: " + esc(D.k || "—") + "</div></div>" +
+      "<h1>TAŞINMAZ YER GÖSTERME TUTANAĞI</h1>" +
+      '<div class="sub">' + esc(OFIS.unvan) + " · " + esc(OFIS.vd) + " · Yetki No: " + esc(OFIS.yetki) + "</div>" +
+      tablo("1. MÜŞTERİ VE GÖSTERİM BİLGİLERİ", satirlar) +
+      tablo("2. GÖSTERİLEN TAŞINMAZ", tasinmaz) +
+      '<div class="legal"><b>3. BEYAN VE TAAHHÜT:</b> ' + yasal + "</div>" +
+      '<div id="chks">' + MADDELER.map(function (t, i) { return '<div class="chk" data-i="' + i + '"><span class="box"></span><span>' + esc(t) + "</span></div>"; }).join("") + "</div>" +
+      '<div class="sigrow">' +
+        '<div class="sigcol"><h4>MÜŞTERİ İMZASI <button type="button" id="clr">Temizle</button></h4>' +
+          '<canvas id="sig"></canvas><div class="hint" id="hint">✍️ Kutuya parmağınızla imzanızı atın.</div>' +
+          '<div style="font:11px Arial;margin-top:4px">' + esc(musteri) + "</div></div>" +
+        '<div class="sigcol"><h4>EMLAK İŞLETMESİ</h4>' +
+          '<div class="stamp"><b>' + esc(OFIS.unvan) + "</b>" + esc(OFIS.ad) + "<br>" + esc(OFIS.vd) + "<br>Tek Yetkili: " + esc(OFIS.yetkili) + "</div></div>" +
+      "</div>" +
+      '<div class="done" id="done"></div>' +
+      '<div class="meta">' + esc(OFIS.adres) + " · Tel: " + esc(OFIS.tel) + "</div>" +
+    "</div>";
+  document.getElementById("actions").style.display = "flex";
+
+  // Onay kutuları
+  var secili = [false, false, false];
+  Array.prototype.forEach.call(document.querySelectorAll(".chk"), function (el) {
+    el.addEventListener("click", function () {
+      if (imzali) return;
+      var i = +el.getAttribute("data-i");
+      secili[i] = !secili[i];
+      el.classList.toggle("on", secili[i]);
+      el.classList.remove("err");
+    });
+  });
+
+  // İmza alanı
+  var cv = document.getElementById("sig"), ctx = cv.getContext("2d"), ciz = false, bos = true, imzali = false;
+  function boyutla() {
+    var r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    var eski = bos ? null : cv.toDataURL();
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.lineWidth = 2.4; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#0B2A6F";
+    if (eski) { var im = new Image(); im.onload = function () { ctx.drawImage(im, 0, 0, r.width, r.height); }; im.src = eski; }
+  }
+  boyutla();
+  window.addEventListener("resize", function () { if (!imzali) boyutla(); });
+  function nokta(e) { var r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  cv.addEventListener("pointerdown", function (e) { if (imzali) return; ciz = true; cv.setPointerCapture(e.pointerId); var p = nokta(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + 0.1, p.y + 0.1); ctx.stroke(); e.preventDefault(); });
+  cv.addEventListener("pointermove", function (e) { if (!ciz) return; var p = nokta(e); ctx.lineTo(p.x, p.y); ctx.stroke(); bos = false; e.preventDefault(); });
+  function bitir() { if (ciz) { ciz = false; if (!bos) { cv.classList.add("ok"); document.getElementById("hint").textContent = "✓ İmza alındı."; } } }
+  cv.addEventListener("pointerup", bitir); cv.addEventListener("pointercancel", bitir);
+  if (!window.PointerEvent) { // eski iPhone/Android tarayıcıları için dokunmatik yedek
+    var tp = function (e) { var t = e.touches[0] || e.changedTouches[0]; return nokta({ clientX: t.clientX, clientY: t.clientY }); };
+    cv.addEventListener("touchstart", function (e) { if (imzali) return; ciz = true; var p = tp(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }, { passive: false });
+    cv.addEventListener("touchmove", function (e) { if (!ciz) return; var p = tp(e); ctx.lineTo(p.x, p.y); ctx.stroke(); bos = false; e.preventDefault(); }, { passive: false });
+    cv.addEventListener("touchend", bitir);
+    cv.addEventListener("mousedown", function (e) { if (imzali) return; ciz = true; var p = nokta(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+    cv.addEventListener("mousemove", function (e) { if (!ciz) return; var p = nokta(e); ctx.lineTo(p.x, p.y); ctx.stroke(); bos = false; });
+    window.addEventListener("mouseup", bitir);
+  }
+  if (!String.prototype.padStart) String.prototype.padStart = function (n, c) { var s = String(this); while (s.length < n) s = (c || " ") + s; return s; };
+  document.getElementById("clr").addEventListener("click", function () { if (imzali) return; ctx.clearRect(0, 0, cv.width, cv.height); bos = true; cv.classList.remove("ok"); document.getElementById("hint").textContent = "✍️ Kutuya parmağınızla imzanızı atın."; });
+
+  // ---------- PDF üretimi (harici kütüphane yok) ----------
+  function sar(c, metin, maxW) {
+    var kel = String(metin).split(/\s+/), satir = "", out = [];
+    kel.forEach(function (k) { var dene = satir ? satir + " " + k : k; if (c.measureText(dene).width > maxW && satir) { out.push(satir); satir = k; } else satir = dene; });
+    if (satir) out.push(satir);
+    return out;
+  }
+  function sayfaCiz(imzaZamani) {
+    var W = 1240, H = 1754, M = 80, c = document.createElement("canvas");
+    c.width = W; c.height = H;
+    var g = c.getContext("2d");
+    g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
+    var y = M;
+    g.fillStyle = "#E1251B"; g.font = "bold 40px Arial"; g.fillText("KAÇMAZ EMLAK", M, y + 34);
+    g.fillStyle = "#0F2338"; g.font = "bold 20px Arial"; g.fillText("M A N A V G A T", M, y + 62);
+    g.font = "bold 18px Arial";
+    g.fillStyle = "#E1251B"; g.fillText("Doğru Analiz,", M, y + 90);
+    var x2 = M + g.measureText("Doğru Analiz, ").width; g.fillStyle = "#1D4ED8"; g.fillText("Etkili Pazarlama,", x2, y + 90);
+    x2 += g.measureText("Etkili Pazarlama, ").width; g.fillStyle = "#15803D"; g.fillText("Hızlı Sonuç", x2, y + 90);
+    g.textAlign = "right"; g.fillStyle = "#0F2338"; g.font = "bold 26px Arial"; g.fillText(D.b, W - M, y + 34);
+    g.font = "18px Arial"; g.fillStyle = "#444"; g.fillText("Doğrulama Kodu: " + (D.k || "—"), W - M, y + 62);
+    g.fillText("İmza: " + imzaZamani, W - M, y + 88); g.textAlign = "left";
+    y += 110; g.strokeStyle = "#0F2338"; g.lineWidth = 3; g.beginPath(); g.moveTo(M, y); g.lineTo(W - M, y); g.stroke();
+    g.lineWidth = 1; g.beginPath(); g.moveTo(M, y + 6); g.lineTo(W - M, y + 6); g.stroke();
+    y += 50; g.textAlign = "center"; g.fillStyle = "#111"; g.font = "bold 34px Times New Roman"; g.fillText("TAŞINMAZ YER GÖSTERME TUTANAĞI", W / 2, y);
+    y += 30; g.font = "18px Arial"; g.fillStyle = "#444"; g.fillText(OFIS.unvan + " · " + OFIS.vd + " · Yetki No: " + OFIS.yetki, W / 2, y); g.textAlign = "left";
+    y += 26;
+    function tbl(baslik, rows) {
+      var kw = 330, rh = 38;
+      g.fillStyle = "#EEF1F5"; g.fillRect(M, y, W - 2 * M, rh); g.strokeStyle = "#9AA3AE"; g.strokeRect(M, y, W - 2 * M, rh);
+      g.fillStyle = "#111"; g.font = "bold 19px Arial"; g.fillText(baslik, M + 12, y + 26); y += rh;
+      rows.forEach(function (r) {
+        g.font = "20px Times New Roman"; var ls = sar(g, r[1], W - 2 * M - kw - 24); var h = Math.max(rh, ls.length * 26 + 12);
+        g.fillStyle = "#FAFBFC"; g.fillRect(M, y, kw, h); g.strokeStyle = "#9AA3AE"; g.strokeRect(M, y, kw, h); g.strokeRect(M + kw, y, W - 2 * M - kw, h);
+        g.fillStyle = "#111"; g.font = "bold 20px Times New Roman"; g.fillText(r[0], M + 12, y + 26);
+        g.font = "20px Times New Roman"; ls.forEach(function (l, i) { g.fillText(l, M + kw + 12, y + 26 + i * 26); });
+        y += h;
+      });
+      y += 16;
+    }
+    tbl("1. MÜŞTERİ VE GÖSTERİM BİLGİLERİ", satirlar);
+    tbl("2. GÖSTERİLEN TAŞINMAZ", tasinmaz);
+    g.font = "20px Times New Roman"; var ym = yasal.replace(/<[^>]+>/g, "");
+    var ls = sar(g, "3. BEYAN VE TAAHHÜT: " + ym, W - 2 * M - 24), bh = ls.length * 27 + 18;
+    g.strokeStyle = "#9AA3AE"; g.strokeRect(M, y, W - 2 * M, bh); g.fillStyle = "#111";
+    ls.forEach(function (l, i) { g.font = (i === 0 ? "bold " : "") + "20px Times New Roman"; g.fillText(l, M + 12, y + 28 + i * 27); });
+    y += bh + 14;
+    MADDELER.forEach(function (t) {
+      g.strokeStyle = "#15803D"; g.lineWidth = 3; g.strokeRect(M + 10, y + 6, 30, 30);
+      g.fillStyle = "#15803D"; g.font = "bold 30px Arial"; g.fillText("✓", M + 13, y + 33);
+      g.lineWidth = 1; g.fillStyle = "#111"; g.font = "21px Times New Roman"; g.fillText(t, M + 56, y + 29);
+      g.strokeStyle = "#9AA3AE"; g.strokeRect(M, y, W - 2 * M, 44); y += 44;
+    });
+    y += 24;
+    var sw = (W - 2 * M - 24) / 2, sh = 260;
+    g.strokeStyle = "#9AA3AE"; g.strokeRect(M, y, sw, sh); g.strokeRect(M + sw + 24, y, sw, sh);
+    g.fillStyle = "#333"; g.font = "bold 18px Arial"; g.fillText("MÜŞTERİ İMZASI", M + 12, y + 26); g.fillText("EMLAK İŞLETMESİ", M + sw + 36, y + 26);
+    var r = cv.getBoundingClientRect(), oran = Math.min((sw - 24) / r.width, (sh - 90) / r.height);
+    g.drawImage(cv, M + 12, y + 36, r.width * oran, r.height * oran);
+    g.fillStyle = "#111"; g.font = "20px Times New Roman"; g.fillText(musteri + " · " + imzaZamani, M + 12, y + sh - 16);
+    g.save(); g.translate(M + sw + 24 + sw / 2, y + sh / 2 + 14); g.rotate(-0.05);
+    g.strokeStyle = "#1D4ED8"; g.lineWidth = 3; g.strokeRect(-sw / 2 + 24, -78, sw - 48, 156);
+    g.fillStyle = "#1D4ED8"; g.textAlign = "center"; g.font = "bold 20px Arial"; g.fillText(OFIS.unvan, 0, -38);
+    g.font = "bold 17px Arial"; g.fillText(OFIS.ad, 0, -8); g.fillText(OFIS.vd, 0, 20); g.fillText("Tek Yetkili: " + OFIS.yetkili, 0, 48);
+    g.restore(); g.textAlign = "left";
+    y += sh + 30;
+    g.fillStyle = "#ECFDF5"; g.fillRect(M, y, W - 2 * M, 54); g.strokeStyle = "#15803D"; g.lineWidth = 2; g.strokeRect(M, y, W - 2 * M, 54);
+    g.fillStyle = "#14532D"; g.font = "bold 20px Arial"; g.textAlign = "center";
+    g.fillText("✓ MÜŞTERİ TARAFINDAN DİJİTAL OLARAK ONAYLANDI VE İMZALANDI · " + imzaZamani, W / 2, y + 34);
+    g.textAlign = "left"; g.lineWidth = 1;
+    g.fillStyle = "#555"; g.font = "16px Arial"; g.fillText(OFIS.adres + " · Tel: " + OFIS.tel, M, H - 50);
+    return c;
+  }
+  function pdfYap(canvas) {
+    var jpg = atob(canvas.toDataURL("image/jpeg", 0.9).split(",")[1]);
+    var PW = 595.28, PH = 841.89, iw = canvas.width, ih = canvas.height;
+    var icerik = "q " + PW + " 0 0 " + PH + " 0 0 cm /Im0 Do Q";
+    var obj = [];
+    obj[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+    obj[2] = "<< /Type /Pages /Kids [3 0 R] /Count 1 >>";
+    obj[3] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + PW + " " + PH + "] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>";
+    obj[4] = null;
+    obj[5] = "<< /Length " + icerik.length + " >>\nstream\n" + icerik + "\nendstream";
+    obj[6] = "<< /Title (" + D.b + " Yer Gosterme Tutanagi - Imzali) /Producer (Kacmaz Emlak Manavgat) >>";
+    var out = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n", ofs = [];
+    for (var i = 1; i <= 6; i++) {
+      ofs[i] = out.length;
+      if (i === 4) out += "4 0 obj\n<< /Type /XObject /Subtype /Image /Width " + iw + " /Height " + ih + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + jpg.length + " >>\nstream\n" + jpg + "\nendstream\nendobj\n";
+      else out += i + " 0 obj\n" + obj[i] + "\nendobj\n";
+    }
+    var xref = out.length;
+    out += "xref\n0 7\n0000000000 65535 f \n";
+    for (i = 1; i <= 6; i++) out += String(ofs[i]).padStart(10, "0") + " 00000 n \n";
+    out += "trailer\n<< /Size 7 /Root 1 0 R /Info 6 0 R >>\nstartxref\n" + xref + "\n%%EOF";
+    var bytes = new Uint8Array(out.length);
+    for (i = 0; i < out.length; i++) bytes[i] = out.charCodeAt(i) & 255;
+    return new File([bytes], dosyaAdi, { type: "application/pdf" });
+  }
+
+  var pdf = null, zaman = "";
+  var btnSign = document.getElementById("btnSign"), btnSend = document.getElementById("btnSend"), btnDl = document.getElementById("btnDl");
+  btnSign.addEventListener("click", function () {
+    var eksik = false;
+    Array.prototype.forEach.call(document.querySelectorAll(".chk"), function (el, i) { if (!secili[i]) { el.classList.add("err"); eksik = true; } });
+    if (eksik) { alert("Lütfen 3 onay kutusunun tamamını işaretleyin."); return; }
+    if (bos) { alert("Lütfen imza alanına parmağınızla imzanızı atın."); cv.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+    btnSign.disabled = true; btnSign.textContent = "⏳ İmzalı PDF hazırlanıyor...";
+    setTimeout(function () {
+      try {
+        imzali = true; zaman = simdi();
+        pdf = pdfYap(sayfaCiz(zaman));
+        var dn = document.getElementById("done");
+        dn.style.display = "block";
+        dn.innerHTML = "✓ Tutanak " + esc(zaman) + " itibarıyla onaylandı ve imzalandı.<br>Şimdi aşağıdaki yeşil butonla <b>imzalı PDF'i ofise geri gönderin</b>.";
+        btnSign.style.display = "none"; btnSend.style.display = "block"; btnDl.style.display = "block";
+        dn.scrollIntoView({ behavior: "smooth", block: "center" });
+      } catch (e) {
+        imzali = false; btnSign.disabled = false; btnSign.textContent = "✅ Kutuları Onayla ve İmzala";
+        alert("PDF hazırlanamadı: " + e.message);
+      }
+    }, 50);
+  });
+  function indir() {
+    var a = document.createElement("a"); a.href = URL.createObjectURL(pdf); a.download = dosyaAdi;
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  var mesaj = function () { return "✅ " + D.b + " numaralı yer gösterme tutanağını onayladım ve imzaladım.\nAd Soyad: " + musteri + "\nTaşınmaz: " + (D.p || "") + " · " + (D.pb || "") + "\nİmza zamanı: " + zaman + "\nDoğrulama: " + (D.k || ""); };
+  btnSend.addEventListener("click", function () {
+    if (!pdf) return;
+    if (navigator.canShare && navigator.canShare({ files: [pdf] })) {
+      navigator.share({ files: [pdf], title: D.b + " İmzalı Tutanak", text: mesaj() }).catch(function (e) {
+        if (e && e.name === "AbortError") return;
+        yedek();
+      });
+    } else yedek();
+  });
+  function yedek() {
+    indir();
+    alert("İmzalı PDF indirildi. Şimdi WhatsApp'ta Kaçmaz Emlak sohbeti açılacak; 📎 ile indirilen PDF'i ekleyip gönderin.");
+    location.href = "https://wa.me/" + OFIS.waGeri + "?text=" + encodeURIComponent(mesaj());
+  }
+  btnDl.addEventListener("click", function () { if (pdf) indir(); });
+})();
+</script>
+</body>
+</html>
