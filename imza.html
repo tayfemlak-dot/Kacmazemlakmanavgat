@@ -47,6 +47,10 @@
   .sigcol h4 button { font: 700 10px Arial; border: 1px solid #999; background: #fff; border-radius: 4px; padding: 3px 7px; }
   canvas#sig { width: 100%; height: 150px; border: 1.5px dashed #E1251B; border-radius: 4px; touch-action: none; background: #FFFEF7; display: block; }
   canvas#sig.ok { border-color: #15803D; border-style: solid; }
+  .kilitli { opacity: .42; filter: grayscale(.6); }
+  .adim { font: 700 11px Arial, sans-serif; color: #0F2338; background: #EEF2F7; border: 1px solid #9AA3AE; border-bottom: none; padding: 6px 9px; }
+  .adim.tamam { background: #ECFDF5; color: #15803D; }
+  #sirauyari { display: none; position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 50; max-width: 92%; background: #B91C1C; color: #fff; font: 700 13px Arial, sans-serif; padding: 10px 14px; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,.3); text-align: center; }
   .hint { font: 11px Arial; color: #B45309; margin-top: 4px; }
   .stamp { border: 2px solid #1D4ED8; color: #1D4ED8; border-radius: 6px; padding: 8px; text-align: center; font: 700 10px/1.4 Arial, sans-serif; transform: rotate(-3deg); margin-top: 6px; }
   .stamp b { font-size: 11px; display: block; }
@@ -150,23 +154,25 @@
       "<h1>TAŞINMAZ YER GÖSTERME TUTANAĞI</h1>" +
       '<div class="sub">' + esc(OFIS.unvan) + " · " + esc(OFIS.vd) + " · Yetki No: " + esc(OFIS.yetki) + "</div>" +
       tablo("1. MÜŞTERİ VE GÖSTERİM BİLGİLERİ", satirlar) +
-      '<div class="tcbox"><label for="tc">T.C. KİMLİK NUMARANIZ (11 hane) *</label>' +
+      '<div class="tcbox"><label for="tc">ADIM 1 · T.C. KİMLİK NUMARANIZ (11 hane) *</label>' +
         '<input id="tc" type="text" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" maxlength="11" autocomplete="off" placeholder="___________" value="' + esc(String(D.mc || "").replace(/\D/g, "").slice(0, 11)) + '" />' +
         '<div class="tcmsg" id="tcmsg">Lütfen 11 haneli T.C. kimlik numaranızı yazın.</div></div>' +
       tablo("2. GÖSTERİLEN TAŞINMAZ", tasinmaz) +
       '<div class="legal"><b>3. BEYAN VE TAAHHÜT:</b> ' + yasal + "</div>" +
+      '<div class="adim" id="adim2">ADIM 2 · Aşağıdaki 3 kutuyu işaretleyin</div>' +
       '<div id="chks">' + MADDELER.map(function (t, i) { return '<div class="chk" data-i="' + i + '"><span class="box"></span><span>' + esc(t) + "</span></div>"; }).join("") + "</div>" +
       '<div class="sigrow">' +
-        '<div class="sigcol"><h4>MÜŞTERİ İMZASI <button type="button" id="clr">Temizle</button></h4>' +
+        '<div class="sigcol" id="sigkol"><h4>ADIM 3 · MÜŞTERİ İMZASI <button type="button" id="clr">Temizle</button></h4>' +
           '<canvas id="sig"></canvas><div class="hint" id="hint">✍️ Kutuya parmağınızla imzanızı atın.</div>' +
           '<div style="font:11px Arial;margin-top:4px">' + esc(musteri) + "</div></div>" +
         '<div class="sigcol"><h4>EMLAK İŞLETMESİ</h4>' +
           '<div class="stamp"><b>' + esc(OFIS.unvan) + "</b>" + esc(OFIS.ad) + "<br>" + esc(OFIS.vd) + "<br>Tek Yetkili: " + esc(OFIS.yetkili) + "</div></div>" +
       "</div>" +
       '<div class="done" id="done"></div>' +
-      '<div class="meta">' + esc(OFIS.adres) + " · Tel: " + esc(OFIS.tel) + " · Form v3</div>" +
+      '<div class="meta">' + esc(OFIS.adres) + " · Tel: " + esc(OFIS.tel) + " · Form v4</div>" +
     "</div>";
   document.getElementById("actions").style.display = "flex";
+  document.body.insertAdjacentHTML("beforeend", '<div id="sirauyari"></div>');
 
   // T.C. Kimlik No — sadece rakam, 11 hane, resmî algoritma kontrolü
   function tcGecerli(v) {
@@ -203,12 +209,33 @@
   Array.prototype.forEach.call(document.querySelectorAll(".chk"), function (el) {
     el.addEventListener("click", function () {
       if (imzali) return;
+      if (!tcGecerli(tcInp.value)) { siraUyar("Önce ADIM 1: 11 haneli T.C. kimlik numaranızı yazın."); tcKontrol(true); tcInp.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
       var i = +el.getAttribute("data-i");
       secili[i] = !secili[i];
       el.classList.toggle("on", secili[i]);
       el.classList.remove("err");
+      siraGuncelle();
     });
   });
+
+  // v4: Sıra kilidi — önce T.C., sonra 3 kutu, en son imza
+  var sirauyari = document.getElementById("sirauyari"), uyariZ = null;
+  function siraUyar(m) { sirauyari.textContent = m; sirauyari.style.display = "block"; clearTimeout(uyariZ); uyariZ = setTimeout(function () { sirauyari.style.display = "none"; }, 3200); }
+  function kutularTamam() { return secili[0] && secili[1] && secili[2]; }
+  function imzaSirasiUygun() {
+    if (!tcGecerli(tcInp.value)) { siraUyar("Önce ADIM 1: 11 haneli T.C. kimlik numaranızı yazın."); tcKontrol(true); tcInp.scrollIntoView({ behavior: "smooth", block: "center" }); return false; }
+    if (!kutularTamam()) { siraUyar("Önce ADIM 2: 3 onay kutusunun tamamını işaretleyin."); document.getElementById("chks").scrollIntoView({ behavior: "smooth", block: "center" }); return false; }
+    return true;
+  }
+  function siraGuncelle() {
+    var tcOk = tcGecerli(tcInp.value);
+    document.getElementById("chks").classList.toggle("kilitli", !tcOk);
+    document.getElementById("adim2").classList.toggle("kilitli", !tcOk);
+    document.getElementById("adim2").classList.toggle("tamam", tcOk && kutularTamam());
+    document.getElementById("sigkol").classList.toggle("kilitli", !(tcOk && kutularTamam()));
+  }
+  tcInp.addEventListener("input", siraGuncelle);
+  siraGuncelle();
 
   // İmza alanı
   var cv = document.getElementById("sig"), ctx = cv.getContext("2d"), ciz = false, bos = true, imzali = false;
@@ -223,16 +250,16 @@
   boyutla();
   window.addEventListener("resize", function () { if (!imzali) boyutla(); });
   function nokta(e) { var r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
-  cv.addEventListener("pointerdown", function (e) { if (imzali) return; ciz = true; cv.setPointerCapture(e.pointerId); var p = nokta(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + 0.1, p.y + 0.1); ctx.stroke(); e.preventDefault(); });
+  cv.addEventListener("pointerdown", function (e) { if (imzali) return; if (!imzaSirasiUygun()) { e.preventDefault(); return; } ciz = true; cv.setPointerCapture(e.pointerId); var p = nokta(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + 0.1, p.y + 0.1); ctx.stroke(); e.preventDefault(); });
   cv.addEventListener("pointermove", function (e) { if (!ciz) return; var p = nokta(e); ctx.lineTo(p.x, p.y); ctx.stroke(); bos = false; e.preventDefault(); });
   function bitir() { if (ciz) { ciz = false; if (!bos) { cv.classList.add("ok"); document.getElementById("hint").textContent = "✓ İmza alındı."; } } }
   cv.addEventListener("pointerup", bitir); cv.addEventListener("pointercancel", bitir);
   if (!window.PointerEvent) { // eski iPhone/Android tarayıcıları için dokunmatik yedek
     var tp = function (e) { var t = e.touches[0] || e.changedTouches[0]; return nokta({ clientX: t.clientX, clientY: t.clientY }); };
-    cv.addEventListener("touchstart", function (e) { if (imzali) return; ciz = true; var p = tp(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }, { passive: false });
+    cv.addEventListener("touchstart", function (e) { if (imzali) return; if (!imzaSirasiUygun()) { e.preventDefault(); return; } ciz = true; var p = tp(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }, { passive: false });
     cv.addEventListener("touchmove", function (e) { if (!ciz) return; var p = tp(e); ctx.lineTo(p.x, p.y); ctx.stroke(); bos = false; e.preventDefault(); }, { passive: false });
     cv.addEventListener("touchend", bitir);
-    cv.addEventListener("mousedown", function (e) { if (imzali) return; ciz = true; var p = nokta(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+    cv.addEventListener("mousedown", function (e) { if (imzali) return; if (!imzaSirasiUygun()) return; ciz = true; var p = nokta(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
     cv.addEventListener("mousemove", function (e) { if (!ciz) return; var p = nokta(e); ctx.lineTo(p.x, p.y); ctx.stroke(); bos = false; });
     window.addEventListener("mouseup", bitir);
   }
