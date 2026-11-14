@@ -62,6 +62,10 @@
   .done { display: none; background: #ECFDF5; border: 2px solid #15803D; color: #14532D; font: 700 12px/1.45 Arial; padding: 9px; border-radius: 6px; margin-top: 10px; text-align: center; }
   .err-page { color: #fff; font: 15px Arial; text-align: center; padding: 60px 20px; }
   @media (max-width: 480px) { .page { padding: 18px 12px; } h1 { font-size: 15px; } .sigrow { flex-direction: column; } }
+.hdl { display: flex; align-items: center; gap: 10px; }
+.hdl .logo { height: 54px; width: auto; display: block; }
+.iletisim { font: 700 9.5px/1.45 Arial, sans-serif; color: #0F2338; margin-top: 4px; }
+.iletisim span { font-weight: 400; color: #444; }
 </style>
 </head>
 <body>
@@ -86,6 +90,7 @@
     tel: "0536 493 77 50",
     waGeri: "905364937750"
   };
+  var LOGO = new Image(); LOGO.crossOrigin = "anonymous"; LOGO.src = "https://kacmaz-crm-manavgat-v75.pages.dev/logo.png";
   var MADDELER = [
     "Taşınmazın tarafıma gösterildiğini ve hizmet bedeli şartını okudum, onaylıyorum.",
     "Uyuşmazlıklarda Manavgat Adliyesi'nin yetkisini kabul ediyorum.",
@@ -148,8 +153,8 @@
 
   root.innerHTML =
     '<div class="page" id="page">' +
-      '<div class="hd"><div><div class="brand">KAÇMAZ EMLAK<small>MANAVGAT</small></div>' +
-      '<div class="slogan"><span class="r">Doğru Analiz,</span> <span class="b">Etkili Pazarlama,</span> <span class="g">Hızlı Sonuç</span></div></div>' +
+      '<div class="hd"><div class="hdl"><img class="logo" src="https://kacmaz-crm-manavgat-v75.pages.dev/logo.png" crossorigin="anonymous" alt="Kaçmaz Emlak"><div><div class="brand">KAÇMAZ EMLAK<small>MANAVGAT</small></div>' +
+      '<div class="iletisim">Tel: 0536 493 77 50 · 0536 493 77 49<br><span>' + esc(OFIS.adres) + '</span></div></div></div>' +
       '<div class="docno"><b>' + esc(D.b) + "</b><br>Doğrulama: " + esc(D.k || "—") + "</div></div>" +
       "<h1>TAŞINMAZ YER GÖSTERME TUTANAĞI</h1>" +
       '<div class="sub">' + esc(OFIS.unvan) + " · " + esc(OFIS.vd) + " · Yetki No: " + esc(OFIS.yetki) + "</div>" +
@@ -279,12 +284,11 @@
     var g = c.getContext("2d");
     g.fillStyle = "#fff"; g.fillRect(0, 0, W, H);
     var y = M;
-    g.fillStyle = "#E1251B"; g.font = "bold 40px Arial"; g.fillText("KAÇMAZ EMLAK", M, y + 34);
-    g.fillStyle = "#0F2338"; g.font = "bold 20px Arial"; g.fillText("M A N A V G A T", M, y + 62);
-    g.font = "bold 18px Arial";
-    g.fillStyle = "#E1251B"; g.fillText("Doğru Analiz,", M, y + 90);
-    var x2 = M + g.measureText("Doğru Analiz, ").width; g.fillStyle = "#1D4ED8"; g.fillText("Etkili Pazarlama,", x2, y + 90);
-    x2 += g.measureText("Etkili Pazarlama, ").width; g.fillStyle = "#15803D"; g.fillText("Hızlı Sonuç", x2, y + 90);
+    var lx = M; try { if (LOGO.complete && LOGO.naturalWidth) { var lh = 96, lw = Math.round(LOGO.naturalWidth * lh / LOGO.naturalHeight); g.drawImage(LOGO, M, y, lw, lh); lx = M + lw + 18; } } catch (e) {}
+    g.fillStyle = "#E1251B"; g.font = "bold 34px Arial"; g.fillText("KAÇMAZ EMLAK", lx, y + 30);
+    g.fillStyle = "#0F2338"; g.font = "bold 17px Arial"; g.fillText("M A N A V G A T", lx, y + 52);
+    g.font = "bold 15px Arial"; g.fillText("Tel: 0536 493 77 50 · 0536 493 77 49", lx, y + 76);
+    g.fillStyle = "#444"; g.font = "15px Arial"; g.fillText(OFIS.adres, lx, y + 96);
     g.textAlign = "right"; g.fillStyle = "#0F2338"; g.font = "bold 26px Arial"; g.fillText(D.b, W - M, y + 34);
     g.font = "18px Arial"; g.fillStyle = "#444"; g.fillText("Doğrulama Kodu: " + (D.k || "—"), W - M, y + 62);
     g.fillText("İmza: " + imzaZamani, W - M, y + 88); g.textAlign = "left";
@@ -381,7 +385,7 @@
     setTimeout(function () {
       try {
         imzali = true; zaman = simdi(); tcInp.readOnly = true;
-        pdf = pdfYap(sayfaCiz(zaman));
+        pdf = pdfYap(sayfaCiz(zaman)); sunucuyaBildir(0);
         var dn = document.getElementById("done");
         dn.style.display = "block";
         dn.innerHTML = "✓ Tutanak " + esc(zaman) + " itibarıyla onaylandı ve imzalandı.<br>Şimdi aşağıdaki yeşil butonla <b>imzalı PDF'i ofise geri gönderin</b>.";
@@ -396,6 +400,18 @@
   function indir() {
     var a = document.createElement("a"); a.href = URL.createObjectURL(pdf); a.download = dosyaAdi;
     document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  // v7.6.2: İmza anında onay CRM'e (Supabase yg_imza_onaylari) otomatik bildirilir
+  var SB_ONAY_URL = "https://ihukbxahcdwaufqlqjux.supabase.co/rest/v1/yg_imza_onaylari";
+  var SB_ONAY_KEY = "sb_publishable_f3RTxiDlZsb3fKOzbetyWA_ui-f-ewF";
+  function sunucuyaBildir(deneme) {
+    try {
+      var png = ""; try { png = cv.toDataURL("image/png"); } catch (e) {}
+      var kayit = { belge_no: String(D.b || ""), kayit_id: String(D.i || ""), dogrulama_kodu: String(D.k || ""), musteri_ad: String(musteri || ""), musteri_tc: String(tcInp.value || ""), imza_zamani: String(zaman || ""), imza_png: png, paket: D, cihaz: String(navigator.userAgent || "").slice(0, 290) };
+      fetch(SB_ONAY_URL, { method: "POST", headers: { "apikey": SB_ONAY_KEY, "Authorization": "Bearer " + SB_ONAY_KEY, "Content-Type": "application/json", "Prefer": "return=minimal" }, body: JSON.stringify(kayit) })
+        .then(function (r) { if (!r.ok) throw new Error("http " + r.status); })
+        .catch(function () { if ((deneme || 0) < 3) setTimeout(function () { sunucuyaBildir((deneme || 0) + 1); }, 3000); });
+    } catch (e) {}
   }
   var mesaj = function () { return "✅ " + D.b + " numaralı yer gösterme tutanağını onayladım ve imzaladım.\nAd Soyad: " + musteri + "\nT.C. Kimlik No: " + tcInp.value + "\nTaşınmaz: " + (D.p || "") + " · " + (D.pb || "") + "\nİmza zamanı: " + zaman + "\nDoğrulama: " + (D.k || ""); };
   btnSend.addEventListener("click", function () {
